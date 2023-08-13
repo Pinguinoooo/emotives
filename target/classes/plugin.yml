@@ -1,0 +1,4 @@
+name: Emotives
+version: '1.0-SNAPSHOT'
+main: com.pinguino.emotives.Main
+api-version: '1.20'

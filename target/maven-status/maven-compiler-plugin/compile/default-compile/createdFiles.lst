@@ -1,0 +1,13 @@
+com\pinguino\emotives\EmoteSound.class
+com\pinguino\emotives\manager\LanguageMessage.class
+com\pinguino\emotives\HelpSubCommand.class
+com\pinguino\emotives\utils\ColorUtil.class
+com\pinguino\emotives\manager\LangManager.class
+com\pinguino\emotives\utils\MessageUtil.class
+com\pinguino\emotives\EmotesSubCmd.class
+com\pinguino\emotives\EmotivesCommand.class
+com\pinguino\emotives\TestSubCmd.class
+com\pinguino\emotives\Main.class
+com\pinguino\emotives\SubCommand.class
+com\pinguino\emotives\Emote.class
+com\pinguino\emotives\Command.class
