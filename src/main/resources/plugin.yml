@@ -2,3 +2,5 @@ name: Emotives
 version: '${project.version}'
 main: com.pinguino.emotives.Main
 api-version: '1.20'
+
+

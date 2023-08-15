@@ -17,7 +17,7 @@ public abstract class Command extends BukkitCommand {
 
     private String permission;
 
-    private org.bukkit.command.Command instance = this;
+
     public final Map<String, SubCommand> subCommands = new HashMap<>();
 
     private final Boolean canConsoleUse;
@@ -106,18 +106,19 @@ public abstract class Command extends BukkitCommand {
     }
 
     public void unregisterCmd() {
-//        CommandMap commandMap = null;
-//        try {
-//            Field field = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-//            field.setAccessible(true);
-//            commandMap = (CommandMap) field.get(Bukkit.getServer());
-//            boolean result = commandMap.getCommand(this.getName()).unregister(commandMap);
-//            System.out.println("Unregistering command " + this.getName() + " result: " + result);
-//
-//        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
-       this.instance = null;
+        // TO-DO THIS IS NOT WORKING
+        CommandMap commandMap = null;
+        try {
+            Field field = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            field.setAccessible(true);
+            commandMap = (CommandMap) field.get(Bukkit.getServer());
+            boolean result = Objects.requireNonNull(commandMap.getCommand(this.getName())).unregister(commandMap);
+            System.out.println("Unregistering command " + this.getName() + " result: " + result);
+
+        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
     }
 
 
