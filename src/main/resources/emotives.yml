@@ -9,6 +9,7 @@
 
 feelings:
   bite:
+    particle: HEART
     messages:
       sender: '&7You sink your teeth into &c&l{player}&r&7''s skin.'
       target: '&c&l{player} &r&7sinks their teeth into your skin.'

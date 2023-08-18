@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 
 public abstract class MessageUtil {
 
-    public static void send(CommandSender player, String message) {
-        player.sendMessage(ColorUtil.color(message));
+    public static void send(CommandSender sender, String message) {
+        sender.sendMessage(ColorUtil.color(message));
     }
 }

@@ -3,6 +3,7 @@ package com.pinguino.emotives;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.pinguino.emotives.manager.LangManager;
+import com.pinguino.emotives.utils.ColorUtil;
 import com.pinguino.emotives.utils.MessageUtil;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
@@ -31,6 +32,7 @@ public final class Main extends JavaPlugin implements Listener {
     private final Cache<UUID, Long> cooldowns = CacheBuilder.newBuilder().expireAfterWrite(cooldown, TimeUnit.SECONDS).build();
     private static Main instance = null;
 
+    private final HashMap<String, String> helpMessages = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -47,22 +49,31 @@ public final class Main extends JavaPlugin implements Listener {
 
         LangManager manager = new LangManager(this);
 
-        new EmotivesCommand();
+
+        getCommand("emotives").setExecutor(new EmotivesCommand());
 
         this.getEmotesFile();
+
+        this.addHelpMessages();
 
         this.initFeelings();
 
         Bukkit.getPluginManager().registerEvents(this, this);
     }
 
+    public void addHelpMessages() {
+        helpMessages.put("&f&l/emotives list » &7List all the emotes", "emotives.list");
+        helpMessages.put("&f&l/emotives reload » &7Reload the plugin", "emotives.reload");
+        helpMessages.put("&f&l/emotives help » &7Show this help menu", null);
+    }
+
+
     private long setConfigCooldown() {
-        long cooldown;
+        long cooldown = 5;
         try {
-            cooldown = Long.parseLong(Objects.requireNonNull(getConfig().getString("cooldown")));
+            cooldown = Long.parseLong(Objects.requireNonNull(getConfig().getString("cooldown", "5")));
         } catch (NumberFormatException e) {
             System.out.println("Invalid cooldown in config.yml, using default cooldown of 5 seconds");
-            cooldown = 5;
         }
         return cooldown;
     }
@@ -86,24 +97,20 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    public void getFeelingsList(Player player) {
-        player.sendMessage(ChatColor.RED + "Emotives Help Menu");
+    public void getFeelingsList(CommandSender sender) {
+        sender.sendMessage(ChatColor.RED + "Emotives Help Menu");
         for (Emote emote : emotes) {
             String permission = emote.getPermission();
-            System.out.println(permission);
-            if (player.hasPermission(permission))
-                MessageUtil.send(player, "&a/" + emote.getName() + "<player> &f- " + emote.getDescription());
+            if (sender.hasPermission(permission))
+                MessageUtil.send(sender, "&a/" + emote.getName() + "<player> &f- " + emote.getDescription());
         }
     }
 
     @Override
     public void onDisable() {
-
         // Unregister your plugin properly
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.disablePlugin(this);
-
-
     }
 
     // reload
@@ -111,8 +118,12 @@ public final class Main extends JavaPlugin implements Listener {
     public void getHelpMenu(CommandSender sender) {
         sender.sendMessage(ChatColor.RED + "Emotives Help Menu");
         sender.sendMessage(ChatColor.GOLD + "-------------------");
-
-
+        for (String message : helpMessages.keySet()) {
+            String permission = helpMessages.get(message);
+            if (permission == null || sender.hasPermission(permission)) {
+                sender.sendMessage(ColorUtil.color(message));
+            }
+        }
     }
 
     public void reloadPlugin() {
@@ -134,13 +145,16 @@ public final class Main extends JavaPlugin implements Listener {
 
                     for (String sound : Objects.requireNonNull(this.emotesFile.getConfigurationSection("feelings." + feeling + ".sounds")).getKeys(false)) {
                         ConfigurationSection soundSection = this.emotesFile.getConfigurationSection("feelings." + feeling + ".sounds." + sound);
-                        EmoteSound soundObj = new EmoteSound(soundSection);
+                        EmoteSound soundObj = soundSection != null ? new EmoteSound(soundSection) : null;
 
                         if (soundObj != null) {
                             sounds.put(sound, soundObj);
                         }
                     }
 
+                    String particle = this.emotesFile.getString("feelings." + feeling + ".particle", "NONE");
+
+                    emote.setParticleString(particle);
                     emote.setSounds(sounds);
                     emote.setDescription(usage);
                     emote.setMessages(messages);
@@ -164,6 +178,10 @@ public final class Main extends JavaPlugin implements Listener {
         getLogger().info("Plugin has been reloaded.");
     }
 
+    public YamlConfiguration getEmotesFilee() {
+        return this.emotesFile;
+    }
+
     private void registerFeeling(String feeling) {
         try {
             String usage = this.emotesFile.getString("feelings." + feeling + ".description");
@@ -182,7 +200,10 @@ public final class Main extends JavaPlugin implements Listener {
                     sounds.put(sound, soundObj);
                 }
             }
-            emotes.add(new Emote(feeling, usage, messages, sounds));
+
+            String particleString = this.emotesFile.getString("feelings." + feeling + ".particle");
+
+            emotes.add(new Emote(feeling, usage, messages, sounds, particleString));
             debug("Registered feeling " + feeling, Level.INFO);
         } catch (Exception e) {
             debug("Error registering feeling " + feeling + ". Skipping", Level.WARNING);

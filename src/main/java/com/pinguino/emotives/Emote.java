@@ -1,29 +1,32 @@
 package com.pinguino.emotives;
 
 import com.pinguino.emotives.utils.MessageUtil;
+import com.pinguino.emotives.utils.ParticleUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandMap;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
-public class Emote extends Command {
+public class Emote extends CustomCommand {
 
     private HashMap<String, String> messages;
     private HashMap<String, Object> sounds;
 
+    private String particleString;
+
+
+
     private final Main main = Main.getInstance();
 
-    public Emote(String command, String usage, HashMap<String, String> messages, HashMap<String, Object> sounds) {
+    public Emote(String command, String usage, HashMap<String, String> messages, HashMap<String, Object> sounds, String particleString) {
         super(command, null, usage, "emotives.emote." + command, false);
         this.messages = messages;
+        this.particleString = particleString;
         this.sounds = sounds;
         this.setName(command);
         this.setPermission("emotives.emote." + command);
@@ -59,20 +62,37 @@ public class Emote extends Command {
                 }
             }
 
-
-            // loop through all the sounds
-            for (String sound : sounds.keySet()) {
-                // get the sound object
-                EmoteSound emoteSound = (EmoteSound) sounds.get(sound);
-                emoteSound.playEmoteSound(player, target);
-            }
-
-            MessageUtil.send(player, messages.get("sender").replace("{player}", target.getName()));
-            MessageUtil.send(target, messages.get("target").replace("{player}", player.getName()));
-
+            executeEmote(player, target);
         }
     }
 
+    private void executeEmote(Player player, Player target) {
+        // loop through all the sounds
+        for (String sound : sounds.keySet()) {
+            // get the sound object
+            EmoteSound emoteSound = (EmoteSound) sounds.get(sound);
+            emoteSound.playEmoteSound(player, target);
+        }
+
+        World playerWorld = player.getWorld();
+        World targetWorld = target.getWorld();
+
+        try {
+            Particle particle = Particle.valueOf(Main.getInstance().getEmotesFilee().getString("feelings." + this.getName() + ".particle", "NONE"));
+            playerWorld.spawnParticle(particle, player.getLocation().add(0,0.5,0.5), 3, 0.5, 0.5, 0.5);
+            targetWorld.spawnParticle(particle, target.getLocation().add(0,0.5,0.5),  3, 0.5, 0.5, 0.5);
+        } catch (IllegalArgumentException e) {
+            MessageUtil.send(player, "&cInvalid particle type");
+            return;
+        }
+
+        String targetMessage =  Main.getInstance().getEmotesFilee().getString("feelings." + this.getName() + ".messages.target", "Emote target message not found");
+        String senderMessage =  Main.getInstance().getEmotesFilee().getString("feelings." + this.getName() + ".messages.sender", "Emote sender message not found");
+
+        MessageUtil.send(player, targetMessage.replace("{player}", target.getName()));
+        MessageUtil.send(target, senderMessage.replace("{player}", player.getName()));
+
+    }
 
     @Override
     public ArrayList<String> onTabComplete(CommandSender sender, String[] args) {
@@ -92,6 +112,10 @@ public class Emote extends Command {
 
     public void setSounds(HashMap<String, Object> sounds) {
         this.sounds = sounds;
+    }
+
+    public void setParticleString(String particleString) {
+        this.particleString = particleString;
     }
 
     public  void unregister() {

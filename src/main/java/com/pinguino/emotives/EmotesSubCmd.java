@@ -3,6 +3,8 @@ package com.pinguino.emotives;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
+
 public class EmotesSubCmd extends SubCommand {
 
 
@@ -17,11 +19,7 @@ public class EmotesSubCmd extends SubCommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+            Main.getInstance().getFeelingsList(sender);
 
-            Main.getInstance().getFeelingsList(player);
-
-        }
     }
 }

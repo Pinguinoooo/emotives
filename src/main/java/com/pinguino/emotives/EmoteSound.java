@@ -15,10 +15,6 @@ public class EmoteSound {
 
     public EmoteSound(ConfigurationSection section) {
 
-        if (section == null) {
-            throw new IllegalArgumentException("Section cannot be null");
-        }
-
         String soundString  = section.getString("sound", "NONE").toUpperCase();
 
         try {

@@ -6,4 +6,7 @@ out
 *.iml
 /*.iml
 .idea/
-target
+target/
+*.class
+*.jar
+target/*
