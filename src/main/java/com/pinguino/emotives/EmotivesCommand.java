@@ -14,15 +14,17 @@ import java.util.Map;
 
 public class EmotivesCommand extends Command {
 
-    public final Map<String, SubCommand> subCommands = new HashMap<>();
+    public final Map<String, Subcommand> subCommands = new HashMap<>();
     public EmotivesCommand() {
         super("emotives", null, true);
-        addSubCommand(new ReloadSubCommand());
-        addSubCommand(new EmotesSubCmd());
-        addSubCommand(new HelpSubCommand());
+        addSubCommand(new ReloadSubcmd());
+        addSubCommand(new EmotesListSubcmd());
+        addSubCommand(new HelpSubcmd());
+        addSubCommand(new IgnoreSubcmd());
+        addSubCommand(new UnignoreSubcmd());
     }
 
-    private void addSubCommand(SubCommand subCommand) {
+    private void addSubCommand(Subcommand subCommand) {
         subCommands.put(subCommand.getName(), subCommand);
     }
 
@@ -40,7 +42,7 @@ public class EmotivesCommand extends Command {
                 return;
             }
 
-            SubCommand subCommand = subCommands.get(args[0].toLowerCase());
+            Subcommand subCommand = subCommands.get(args[0].toLowerCase());
 
             if (!subCommand.canConsoleUse() && !(sender instanceof Player)) {
                 System.out.println("This command can only be used by players");

@@ -1,12 +1,16 @@
 package com.pinguino.emotives;
 
 import com.pinguino.emotives.utils.MessageUtil;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class ReloadSubCommand extends SubCommand {
+import java.util.List;
 
-    public ReloadSubCommand() {
+public class ReloadSubcmd extends Subcommand {
+
+    public ReloadSubcmd() {
         super(true, true);
     }
 
@@ -20,5 +24,10 @@ public class ReloadSubCommand extends SubCommand {
 
             Main.getInstance().reloadPlugin();
             MessageUtil.send(sender, "&a[EMOTIVES] Plugin has been reloaded");
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        return null;
     }
 }

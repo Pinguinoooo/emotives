@@ -1,1 +1,3 @@
-no_permission: '&cJe hebt geen permissie om dit te doen!'
+noPermission: '&cJe hebt geen toestemming om dit te doen!'
+helpHeader: '&6&lHelp'
+emoteMessage:  "&a/{emote} <player> &f- {description}"

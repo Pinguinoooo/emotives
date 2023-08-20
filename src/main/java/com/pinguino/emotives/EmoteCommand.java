@@ -12,12 +12,12 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
 
-public abstract class CustomCommand extends BukkitCommand {
+public abstract class EmoteCommand extends BukkitCommand {
 
     private String permission;
     private final Boolean canConsoleUse;
 
-    public CustomCommand(String command, @Nullable String[] aliases, String description, @Nullable String permission, Boolean canConsoleUse) {
+    public EmoteCommand(String command, @Nullable String[] aliases, String description, @Nullable String permission, Boolean canConsoleUse) {
         super(command);
         if (aliases != null) this.setAliases(Arrays.asList(aliases));
 
@@ -65,22 +65,6 @@ public abstract class CustomCommand extends BukkitCommand {
     }
 
     public abstract List<String> onTabComplete(CommandSender sender, String[] args);
-
-    public void unregisterCmd() {
-        // TO-DO THIS IS NOT WORKING
-        CommandMap commandMap = null;
-        try {
-            Field field = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-            field.setAccessible(true);
-            commandMap = (CommandMap) field.get(Bukkit.getServer());
-            boolean result = Objects.requireNonNull(commandMap.getCommand(this.getName())).unregister(commandMap);
-            System.out.println("Unregistering command " + this.getName() + " result: " + result);
-
-        } catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-
-    }
 
 
 }

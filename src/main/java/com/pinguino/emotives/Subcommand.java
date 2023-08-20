@@ -1,17 +1,15 @@
 package com.pinguino.emotives;
 
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandMap;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
-import javax.annotation.Nullable;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 
-public abstract class SubCommand {
+public abstract class Subcommand implements TabCompleter {
     public boolean hasPermission;
     private final boolean consoleUse;
 
-    public SubCommand(Boolean consoleUse, Boolean hasPermission) {
+    public Subcommand(Boolean consoleUse, Boolean hasPermission) {
         this.consoleUse = consoleUse;
         this.hasPermission = hasPermission;
     }

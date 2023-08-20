@@ -1,1 +1,3 @@
-no_permission: '&cYou do not have permission to do this!'
+noPermission: '&cYou do not have permission to do this!'
+helpHeader: '&6&lHelp ------ {page}/{maxPage}'
+emoteMessage:  "&a/{emote} <player> &f- {description}"

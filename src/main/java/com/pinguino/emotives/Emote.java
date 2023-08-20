@@ -1,7 +1,6 @@
 package com.pinguino.emotives;
 
 import com.pinguino.emotives.utils.MessageUtil;
-import com.pinguino.emotives.utils.ParticleUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Particle;
@@ -9,13 +8,13 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.logging.Level;
 
-public class Emote extends CustomCommand {
+public class Emote extends EmoteCommand {
 
     private HashMap<String, String> messages;
     private HashMap<String, Object> sounds;
@@ -23,6 +22,7 @@ public class Emote extends CustomCommand {
     private String particleString;
 
     private final Main main = Main.getInstance();
+    private boolean disabled = false;
 
     public Emote(String name, String usage) {
         super(name, null, usage, "emotives.emote." + name, false);
@@ -34,7 +34,6 @@ public class Emote extends CustomCommand {
     private void initEmote() {
 
         this.setDescription(main.getEmoteConfigString("feelings." + this.getName() + ".description", "Emote description not found"));
-
 
         this.particleString = main.getEmoteConfigString("feelings." + this.getName() + ".particle", "NONE");
 
@@ -62,6 +61,11 @@ public class Emote extends CustomCommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        if (disabled) {
+            sender.sendMessage(ChatColor.RED + "This emote is disabled");
+            return;
+        }
+
         if (sender instanceof Player) {
             Player player = (Player) sender;
 
@@ -74,6 +78,11 @@ public class Emote extends CustomCommand {
 
             if (target == null) {
                 player.sendMessage(ChatColor.RED + "Player not found");
+                return;
+            }
+
+            if (main.getIgnoreManager().hasEveryoneIgnored(target.getUniqueId().toString()) || main.getIgnoreManager().isIgnoring(target.getUniqueId().toString(), player.getUniqueId().toString())) {
+                player.sendMessage(ChatColor.RED + target.getName() + " is not accepting emotes!");
                 return;
             }
 
@@ -95,6 +104,13 @@ public class Emote extends CustomCommand {
     }
 
     public void reloadEmote() {
+        if (main.getEmoteConfigSection("feelings." + this.getName()) == null) {
+            System.out.println("Emote " + this.getName() + " is disabled");
+            this.disabled = true;
+            return;
+        }
+
+        this.disabled = false;
         initEmote();
     }
 
@@ -115,14 +131,13 @@ public class Emote extends CustomCommand {
             targetWorld.spawnParticle(particle, target.getLocation().add(0, 0.5, 0.5), 3, 0.5, 0.5, 0.5);
         } catch (IllegalArgumentException e) {
             main.debug("Invalid particle name: " + particleString + ". Particle will not be ran", Level.SEVERE);
-            return;
         }
 
         String targetMessage = messages.get("target");
         String senderMessage = messages.get("sender");
 
-        MessageUtil.send(player, targetMessage.replace("{player}", target.getName()));
-        MessageUtil.send(target, senderMessage.replace("{player}", player.getName()));
+        MessageUtil.send(player, senderMessage.replace("{player}", target.getName()));
+        MessageUtil.send(target, targetMessage.replace("{player}", player.getName()));
 
     }
 
@@ -134,9 +149,12 @@ public class Emote extends CustomCommand {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 results.add(player.getName());
             }
+
         }
-        return results;
+        return StringUtil.copyPartialMatches(args[0], results, new ArrayList<>());
     }
 
-
+    public boolean isDisabled() {
+        return disabled;
+    }
 }

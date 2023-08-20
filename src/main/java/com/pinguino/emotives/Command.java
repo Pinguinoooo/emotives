@@ -39,8 +39,6 @@ public abstract class Command implements CommandExecutor, TabCompleter {
         return false;
     }
 
-
-
     public abstract void onCommand(CommandSender sender, String[] args);
 
 }

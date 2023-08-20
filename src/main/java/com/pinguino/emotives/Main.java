@@ -2,7 +2,9 @@ package com.pinguino.emotives;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.pinguino.emotives.manager.IgnoreManager;
 import com.pinguino.emotives.manager.LangManager;
+import com.pinguino.emotives.manager.LanguageMessage;
 import com.pinguino.emotives.utils.ColorUtil;
 import com.pinguino.emotives.utils.MessageUtil;
 import org.bukkit.*;
@@ -24,7 +26,7 @@ import java.util.logging.Level;
 
 public final class Main extends JavaPlugin implements Listener {
 
-    private YamlConfiguration locale;
+
     private List<Emote> emotes = new ArrayList<>();
 
     private final long cooldown = setConfigCooldown();
@@ -34,6 +36,9 @@ public final class Main extends JavaPlugin implements Listener {
     private static Main instance = null;
 
     private final HashMap<String, String> helpMessages = new HashMap<>();
+    private LangManager langManager;
+
+    public IgnoreManager manager;
 
     @Override
     public void onEnable() {
@@ -48,8 +53,8 @@ public final class Main extends JavaPlugin implements Listener {
         saveResource("emotives.yml", false);
 
 
-        LangManager manager = new LangManager(this);
-
+        this.langManager = new LangManager();
+        this.manager = new IgnoreManager();
 
         getCommand("emotives").setExecutor(new EmotivesCommand());
 
@@ -59,11 +64,13 @@ public final class Main extends JavaPlugin implements Listener {
 
         this.initFeelings();
 
+
+
         Bukkit.getPluginManager().registerEvents(this, this);
     }
 
     public void addHelpMessages() {
-        helpMessages.put("&f&l/emotives list » &7List all the emotes",null);
+        helpMessages.put("&f&l/emotives list » &7List all the emotes", null);
         helpMessages.put("&f&l/emotives reload » &7Reload the plugin", "emotives.reload");
         helpMessages.put("&f&l/emotives help » &7Show this help menu", null);
     }
@@ -98,13 +105,8 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-    public void getFeelingsList(CommandSender sender) {
-        sender.sendMessage(ChatColor.RED + "Emotives Help Menu");
-        for (Emote emote : emotes) {
-            String permission = emote.getPermission();
-            if (sender.hasPermission(permission))
-                MessageUtil.send(sender, "&a/" + emote.getName() + "<player> &f- " + emote.getDescription());
-        }
+    public List<Emote> getEmotes() {
+        return emotes;
     }
 
     @Override
@@ -131,16 +133,24 @@ public final class Main extends JavaPlugin implements Listener {
         // Clear existing emotes and cooldowns
         reloadConfig();
         initEmoteFile();
+
+        langManager.reloadLocale();
+
         for (Emote emote : emotes) {
-            emote.reloadEmote();
+                emote.reloadEmote();
         }
+
+        boolean needsCommandSync = false;
 
         for (String feeling : Objects.requireNonNull(this.emotesFile.getConfigurationSection("feelings")).getKeys(false)) {
 
             if (emotes.stream().noneMatch(emote -> emote.getName().equals(feeling))) {
                 registerFeeling(feeling);
+                needsCommandSync = true;
             }
+        }
 
+        if (needsCommandSync) {
             try {
                 final Server server = Bukkit.getServer();
                 final Method syncCommandsMethod = server.getClass().getDeclaredMethod("syncCommands");
@@ -154,37 +164,12 @@ public final class Main extends JavaPlugin implements Listener {
         getLogger().info("Plugin has been reloaded.");
     }
 
-    public YamlConfiguration getEmotesFile() {
-        return this.emotesFile;
-    }
-
     private void registerFeeling(String feeling) {
-        try {
-            String usage = this.emotesFile.getString("feelings." + feeling + ".description");
-            HashMap<String, String> messages = new HashMap<>();
-            HashMap<String, Object> sounds = new HashMap<>();
+        String usage = this.emotesFile.getString("feelings." + feeling + ".description", "Emote someone");
 
-            for (String message : Objects.requireNonNull(this.emotesFile.getConfigurationSection("feelings." + feeling + ".messages")).getKeys(false)) {
-                messages.put(message, this.emotesFile.getString("feelings." + feeling + ".messages." + message));
-            }
+        emotes.add(new Emote(feeling, usage));
 
-            for (String sound : Objects.requireNonNull(this.emotesFile.getConfigurationSection("feelings." + feeling + ".sounds")).getKeys(false)) {
-                ConfigurationSection soundSection = this.emotesFile.getConfigurationSection("feelings." + feeling + ".sounds." + sound);
-                EmoteSound soundObj = new EmoteSound(soundSection);
-
-                if (soundObj != null) {
-                    sounds.put(sound, soundObj);
-                }
-            }
-
-            String particleString = this.emotesFile.getString("feelings." + feeling + ".particle");
-
-            emotes.add(new Emote(feeling, usage, messages, sounds, particleString));
-            debug("Registered feeling " + feeling, Level.INFO);
-        } catch (Exception e) {
-            debug("Error registering feeling " + feeling + ". Skipping", Level.WARNING);
-            e.printStackTrace();
-        }
+        debug("Registered feeling " + feeling, Level.INFO);
     }
 
     public String getEmoteConfigString(String path, @Nullable String def) {
@@ -199,7 +184,13 @@ public final class Main extends JavaPlugin implements Listener {
         getLogger().log(level, message);
     }
 
+    public IgnoreManager getIgnoreManager() {
+        return manager;
+    }
+
     public Cache<UUID, Long> getCooldowns() {
         return cooldowns;
     }
+
+
 }

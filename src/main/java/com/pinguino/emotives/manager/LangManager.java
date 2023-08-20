@@ -11,17 +11,24 @@ public class LangManager {
 
     private static YamlConfiguration lang;
 
-    public LangManager(Main main) {
+    private final Main main = Main.getInstance();
+
+    public LangManager() {
+      initLanguageFile();
+    }
+
+    private void initLanguageFile() {
         File file = new File(main.getDataFolder(), main.getConfig().getString("language") + ".yml");
 
         if (file.exists()) {
             lang = YamlConfiguration.loadConfiguration(file);
         } else {
             System.out.println("Could not find language file: " + main.getConfig().getString("language") + ".yml");
-            // shut down the plugin
-            main.getServer().getPluginManager().disablePlugin(main);
         }
+    }
 
+    public void reloadLocale() {
+        initLanguageFile();
     }
 
     public static String getMsg(LanguageMessage key) {

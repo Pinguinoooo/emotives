@@ -1,11 +1,14 @@
 package com.pinguino.emotives;
 
-import com.pinguino.emotives.utils.MessageUtil;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-public class HelpSubCommand extends SubCommand {
+import java.util.ArrayList;
+import java.util.List;
 
-    public HelpSubCommand() {
+public class HelpSubcmd extends Subcommand {
+
+    public HelpSubcmd() {
         super(true, false);
     }
 
@@ -17,5 +20,10 @@ public class HelpSubCommand extends SubCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         Main.getInstance().getHelpMenu(sender);
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        return null;
     }
 }
