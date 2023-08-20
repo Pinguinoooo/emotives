@@ -9,30 +9,28 @@
 
 feelings:
   bite:
-    particle: HEART
+    particle: SWEEP_ATTACK
+    description: 'Sink your teeth into another player'
     messages:
-      sender: '&7You sink your teeth into &c&l{player}&r&7''s skin.'
+      sender: '&7You sink your teeth into &c&l{player}&r&7''s s.'
       target: '&c&l{player} &r&7sinks their teeth into your skin.'
     sounds:
       Sound1:
-        name: ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR
+        sound: ENTITY_ZOMBIE_ATTACK_WOODEN_D
         volume: 2.0
         pitch: 2.0
-      sound2:
-        name: None
-        volume: 0.0
-        pitch: 0.0
   kiss:
+    particle: HEART
+    description: 'Spread the love with a kiss!'
     messages:
-        sender: '&7You kiss &c&l{player}&r&7.'
-        target: '&c&l{player} &r&7kisses you.'
+      sender: '#FD8787You kisss &c&l{player}&r&7.'
+      target: '&c&l{player} #FD8787kisses you. How nice of them!'
     sounds:
-        Sound1:
-            name: ENTITY_ZOMBIE_ATTACK_WOODEN_DOOR
-            volume: 2.0
-            pitch: 2.0
-        sound2:
-            name: None
-            volume: 0.0
-            pitch: 0.0
-
+      wda:
+        sound: NONE
+        volume: 0.5
+        pitch: 2.0
+      awad:
+        sound: ENTITY_PLAYER_LEVELUP
+        volume: 0.5
+        pitch: 2.0
