@@ -11,30 +11,12 @@ public abstract class SubCommand {
     public boolean hasPermission;
     private final boolean consoleUse;
 
-//    private final String permission;
-//
-//    private final String description;
-//
-//    private final String name;
-
     public SubCommand(Boolean consoleUse, Boolean hasPermission) {
         this.consoleUse = consoleUse;
         this.hasPermission = hasPermission;
-//        this.permission = permission;
-//        this.name = name;
-//        this.description = description;
-//        Main.getInstance().addHelpMessage(name, description, permission);
     }
-//
+
     public abstract String getName();
-//
-//    public  String getPermission() {
-//        return permission;
-//    }
-//
-//    public String getDescription() {
-//        return description;
-//    }
 
     public abstract void execute(CommandSender sender, String[] args);
 

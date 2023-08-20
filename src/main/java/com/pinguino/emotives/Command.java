@@ -24,7 +24,6 @@ public abstract class Command implements CommandExecutor, TabCompleter {
 
     }
 
-
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull org.bukkit.command.Command command, @NotNull String s, @NotNull String[] strings) {
 

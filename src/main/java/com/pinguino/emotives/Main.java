@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -52,7 +53,7 @@ public final class Main extends JavaPlugin implements Listener {
 
         getCommand("emotives").setExecutor(new EmotivesCommand());
 
-        this.getEmotesFile();
+        this.initEmoteFile();
 
         this.addHelpMessages();
 
@@ -62,7 +63,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
 
     public void addHelpMessages() {
-        helpMessages.put("&f&l/emotives list » &7List all the emotes", "emotives.list");
+        helpMessages.put("&f&l/emotives list » &7List all the emotes",null);
         helpMessages.put("&f&l/emotives reload » &7Reload the plugin", "emotives.reload");
         helpMessages.put("&f&l/emotives help » &7Show this help menu", null);
     }
@@ -86,7 +87,7 @@ public final class Main extends JavaPlugin implements Listener {
         return instance;
     }
 
-    private void getEmotesFile() {
+    private void initEmoteFile() {
         File file = new File(this.getDataFolder(), "emotives.yml");
         this.emotesFile = YamlConfiguration.loadConfiguration(file);
     }
@@ -129,37 +130,12 @@ public final class Main extends JavaPlugin implements Listener {
     public void reloadPlugin() {
         // Clear existing emotes and cooldowns
         reloadConfig();
-        getEmotesFile();
+        initEmoteFile();
+        for (Emote emote : emotes) {
+            emote.reloadEmote();
+        }
 
         for (String feeling : Objects.requireNonNull(this.emotesFile.getConfigurationSection("feelings")).getKeys(false)) {
-            // make map of emotes keys
-            for (Emote emote : emotes) {
-                if (feeling.equals(emote.getName())) {
-                    String usage = this.emotesFile.getString("feelings." + feeling + ".description", "Emote description not found");
-                    HashMap<String, String> messages = new HashMap<>();
-                    HashMap<String, Object> sounds = new HashMap<>();
-
-                    for (String message : Objects.requireNonNull(this.emotesFile.getConfigurationSection("feelings." + feeling + ".messages")).getKeys(false)) {
-                        messages.put(message, this.emotesFile.getString("feelings." + feeling + ".messages." + message));
-                    }
-
-                    for (String sound : Objects.requireNonNull(this.emotesFile.getConfigurationSection("feelings." + feeling + ".sounds")).getKeys(false)) {
-                        ConfigurationSection soundSection = this.emotesFile.getConfigurationSection("feelings." + feeling + ".sounds." + sound);
-                        EmoteSound soundObj = soundSection != null ? new EmoteSound(soundSection) : null;
-
-                        if (soundObj != null) {
-                            sounds.put(sound, soundObj);
-                        }
-                    }
-
-                    String particle = this.emotesFile.getString("feelings." + feeling + ".particle", "NONE");
-
-                    emote.setParticleString(particle);
-                    emote.setSounds(sounds);
-                    emote.setDescription(usage);
-                    emote.setMessages(messages);
-                }
-            }
 
             if (emotes.stream().noneMatch(emote -> emote.getName().equals(feeling))) {
                 registerFeeling(feeling);
@@ -178,7 +154,7 @@ public final class Main extends JavaPlugin implements Listener {
         getLogger().info("Plugin has been reloaded.");
     }
 
-    public YamlConfiguration getEmotesFilee() {
+    public YamlConfiguration getEmotesFile() {
         return this.emotesFile;
     }
 
@@ -209,6 +185,14 @@ public final class Main extends JavaPlugin implements Listener {
             debug("Error registering feeling " + feeling + ". Skipping", Level.WARNING);
             e.printStackTrace();
         }
+    }
+
+    public String getEmoteConfigString(String path, @Nullable String def) {
+        return this.emotesFile.getString(path, def != null ? def : "Emote config string not found");
+    }
+
+    public ConfigurationSection getEmoteConfigSection(String path) {
+        return this.emotesFile.getConfigurationSection(path);
     }
 
     public void debug(String message, Level level) {

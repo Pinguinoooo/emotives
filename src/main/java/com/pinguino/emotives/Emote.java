@@ -7,10 +7,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.logging.Level;
 
 public class Emote extends CustomCommand {
 
@@ -19,17 +22,42 @@ public class Emote extends CustomCommand {
 
     private String particleString;
 
-
-
     private final Main main = Main.getInstance();
 
-    public Emote(String command, String usage, HashMap<String, String> messages, HashMap<String, Object> sounds, String particleString) {
-        super(command, null, usage, "emotives.emote." + command, false);
+    public Emote(String name, String usage) {
+        super(name, null, usage, "emotives.emote." + name, false);
+        this.setName(name);
+        this.setPermission("emotives.emote." + name);
+        this.initEmote();
+    }
+
+    private void initEmote() {
+
+        this.setDescription(main.getEmoteConfigString("feelings." + this.getName() + ".description", "Emote description not found"));
+
+
+        this.particleString = main.getEmoteConfigString("feelings." + this.getName() + ".particle", "NONE");
+
+        HashMap<String, String> messages = new HashMap<>();
+        HashMap<String, Object> sounds = new HashMap<>();
+
+        for (String message : (main.getEmoteConfigSection("feelings." + this.getName() + ".messages")).getKeys(false)) {
+            messages.put(message, main.getEmoteConfigString("feelings." + this.getName() + ".messages." + message, "Emote message not found"));
+        }
+
+        for (String sound : main.getEmoteConfigSection("feelings." + this.getName() + ".sounds").getKeys(false)) {
+            ConfigurationSection soundSection = main.getEmoteConfigSection("feelings." + this.getName() + ".sounds." + sound);
+            EmoteSound soundObj = soundSection != null ? new EmoteSound(soundSection) : null;
+
+            if (soundObj != null) {
+                sounds.put(sound, soundObj);
+            }
+        }
+
         this.messages = messages;
-        this.particleString = particleString;
         this.sounds = sounds;
-        this.setName(command);
-        this.setPermission("emotives.emote." + command);
+
+        this.particleString = main.getEmoteConfigString("feelings." + this.getName() + ".particle", "NONE");
     }
 
     @Override
@@ -51,7 +79,7 @@ public class Emote extends CustomCommand {
 
             if (!player.hasPermission("emotives.cooldowns.bypass")) {
                 // Check if the player has a cooldown
-                if(main.getCooldowns().asMap().containsKey(player.getUniqueId())) {
+                if (main.getCooldowns().asMap().containsKey(player.getUniqueId())) {
                     long secondsLeft = main.getCooldowns().getIfPresent(player.getUniqueId()) - System.currentTimeMillis();
                     player.sendMessage(ChatColor.RED + "You have to wait " + secondsLeft / 1000 + " seconds before you can use this command again.");
                     return;
@@ -66,6 +94,10 @@ public class Emote extends CustomCommand {
         }
     }
 
+    public void reloadEmote() {
+        initEmote();
+    }
+
     private void executeEmote(Player player, Player target) {
         // loop through all the sounds
         for (String sound : sounds.keySet()) {
@@ -78,16 +110,16 @@ public class Emote extends CustomCommand {
         World targetWorld = target.getWorld();
 
         try {
-            Particle particle = Particle.valueOf(Main.getInstance().getEmotesFilee().getString("feelings." + this.getName() + ".particle", "NONE"));
-            playerWorld.spawnParticle(particle, player.getLocation().add(0,0.5,0.5), 3, 0.5, 0.5, 0.5);
-            targetWorld.spawnParticle(particle, target.getLocation().add(0,0.5,0.5),  3, 0.5, 0.5, 0.5);
+            Particle particle = Particle.valueOf(particleString);
+            playerWorld.spawnParticle(particle, player.getLocation().add(0, 0.5, 0.5), 3, 0.5, 0.5, 0.5);
+            targetWorld.spawnParticle(particle, target.getLocation().add(0, 0.5, 0.5), 3, 0.5, 0.5, 0.5);
         } catch (IllegalArgumentException e) {
-            MessageUtil.send(player, "&cInvalid particle type");
+            main.debug("Invalid particle name: " + particleString + ". Particle will not be ran", Level.SEVERE);
             return;
         }
 
-        String targetMessage =  Main.getInstance().getEmotesFilee().getString("feelings." + this.getName() + ".messages.target", "Emote target message not found");
-        String senderMessage =  Main.getInstance().getEmotesFilee().getString("feelings." + this.getName() + ".messages.sender", "Emote sender message not found");
+        String targetMessage = messages.get("target");
+        String senderMessage = messages.get("sender");
 
         MessageUtil.send(player, targetMessage.replace("{player}", target.getName()));
         MessageUtil.send(target, senderMessage.replace("{player}", player.getName()));
@@ -106,19 +138,5 @@ public class Emote extends CustomCommand {
         return results;
     }
 
-    public void setMessages(HashMap<String, String> messages) {
-        this.messages = messages;
-    }
 
-    public void setSounds(HashMap<String, Object> sounds) {
-        this.sounds = sounds;
-    }
-
-    public void setParticleString(String particleString) {
-        this.particleString = particleString;
-    }
-
-    public  void unregister() {
-        this.unregisterCmd();
-    }
 }

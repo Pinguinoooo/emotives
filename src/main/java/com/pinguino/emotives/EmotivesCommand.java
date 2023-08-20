@@ -6,7 +6,6 @@ import com.pinguino.emotives.utils.MessageUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +47,6 @@ public class EmotivesCommand extends Command {
                 return;
             }
 
-
             if (subCommand.hasPermission && !sender.hasPermission("emotives." + subCommand.getName())) {
                 MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.NO_PERMISSION).replace("{permission}", "emotives." + subCommand.getName()));
                 return;
@@ -58,7 +56,6 @@ public class EmotivesCommand extends Command {
             return;
         }
 
-//        MessageUtil.send(sender, "&aEmotives v" + Main.getInstance().getDescription().getVersion() + " by Pinguino");
         Main.getInstance().getHelpMenu(sender);
 
     }

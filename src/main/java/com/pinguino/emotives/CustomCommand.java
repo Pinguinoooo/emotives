@@ -15,9 +15,6 @@ import java.util.*;
 public abstract class CustomCommand extends BukkitCommand {
 
     private String permission;
-
-
-
     private final Boolean canConsoleUse;
 
     public CustomCommand(String command, @Nullable String[] aliases, String description, @Nullable String permission, Boolean canConsoleUse) {
@@ -46,13 +43,10 @@ public abstract class CustomCommand extends BukkitCommand {
     @Override
     public boolean execute(CommandSender commandSender, String s, String[] strings) {
 
-
-
         if (!canConsoleUse && !(commandSender instanceof Player)) {
             System.out.println("This command can only be used by players");
             return false;
         }
-
 
         if (permission != null && !commandSender.hasPermission(permission)) {
             commandSender.sendMessage(Objects.requireNonNull(this.getPermissionMessage()));
@@ -62,8 +56,6 @@ public abstract class CustomCommand extends BukkitCommand {
         execute(commandSender, strings);
         return false;
     }
-
-
 
     public abstract void execute(CommandSender sender, String[] args);
 
