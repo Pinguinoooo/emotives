@@ -73,6 +73,11 @@ public final class Main extends JavaPlugin implements Listener {
         helpMessages.put("&f&l/emotives list » &7List all the emotes", null);
         helpMessages.put("&f&l/emotives reload » &7Reload the plugin", "emotives.reload");
         helpMessages.put("&f&l/emotives help » &7Show this help menu", null);
+        helpMessages.put("&f&l/emotives ignore <player> » &7Ignore a player", "emotives.ignore");
+        helpMessages.put("&f&l/emotives ignore all/everyone » &7Ignore all players", "emotives.ignore");
+        helpMessages.put("&f&l/emotives unignore <player> » &7Unignore a player", "emotives.unignore");
+        helpMessages.put("&f&l/emotives unignore all/everyone » &7Unignore all players", "emotives.unignore");
+        helpMessages.put("&f&l/emotives ignorelist » &7List all ignored players", null);
     }
 
 
@@ -84,6 +89,10 @@ public final class Main extends JavaPlugin implements Listener {
             System.out.println("Invalid cooldown in config.yml, using default cooldown of 5 seconds");
         }
         return cooldown;
+    }
+
+    public void sendNoPermsMessage(CommandSender sender, String permission) {
+         MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.NO_PERMISSION, "You don't have perms to use this command.").replace("{permission}", permission));
     }
 
     long getCooldown() {

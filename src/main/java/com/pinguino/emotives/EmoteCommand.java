@@ -25,7 +25,7 @@ public abstract class EmoteCommand extends BukkitCommand {
 
         if (permission != null) {
             this.permission = permission;
-            this.setPermissionMessage(LangManager.getMsg(LanguageMessage.NO_PERMISSION).replace("{permission}", permission));
+
         }
 
         this.canConsoleUse = canConsoleUse;
@@ -49,7 +49,7 @@ public abstract class EmoteCommand extends BukkitCommand {
         }
 
         if (permission != null && !commandSender.hasPermission(permission)) {
-            commandSender.sendMessage(Objects.requireNonNull(this.getPermissionMessage()));
+            Main.getInstance().sendNoPermsMessage(commandSender, permission);
             return false;
         }
 

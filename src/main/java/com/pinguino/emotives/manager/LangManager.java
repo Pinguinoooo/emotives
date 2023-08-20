@@ -4,6 +4,7 @@ package com.pinguino.emotives.manager;
 import com.pinguino.emotives.Main;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
@@ -31,8 +32,8 @@ public class LangManager {
         initLanguageFile();
     }
 
-    public static String getMsg(LanguageMessage key) {
-        String msg = lang.getString(key.name().toLowerCase());
+    public static String getMsg(LanguageMessage key, @Nullable String def) {
+        String msg = lang.getString(key.name().toLowerCase(), def);
 
         if (msg == null) {
             System.out.println("[PINGUINO] Could not find message with key: " + key);

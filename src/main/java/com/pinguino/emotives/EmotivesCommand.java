@@ -22,6 +22,7 @@ public class EmotivesCommand extends Command {
         addSubCommand(new HelpSubcmd());
         addSubCommand(new IgnoreSubcmd());
         addSubCommand(new UnignoreSubcmd());
+        addSubCommand(new IgnoreListSubcmd());
     }
 
     private void addSubCommand(Subcommand subCommand) {
@@ -50,7 +51,7 @@ public class EmotivesCommand extends Command {
             }
 
             if (subCommand.hasPermission && !sender.hasPermission("emotives." + subCommand.getName())) {
-                MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.NO_PERMISSION).replace("{permission}", "emotives." + subCommand.getName()));
+                Main.getInstance().sendNoPermsMessage(sender, "emotives." + subCommand.getName());
                 return;
             }
 

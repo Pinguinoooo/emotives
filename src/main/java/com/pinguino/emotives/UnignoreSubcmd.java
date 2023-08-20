@@ -5,6 +5,7 @@ import com.pinguino.emotives.manager.LangManager;
 import com.pinguino.emotives.manager.LanguageMessage;
 import com.pinguino.emotives.utils.MessageUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -28,6 +29,11 @@ public class UnignoreSubcmd extends Subcommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+            MessageUtil.send(sender, "&cUsage: /emotives unignore <player/all/everyone>");
+            return;
+        }
+
         if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("everyone")) {
             ignoreManager.unignoreAll((Player) sender);
             return;
@@ -36,11 +42,14 @@ public class UnignoreSubcmd extends Subcommand {
         Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null) {
-            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.PLAYER_NOT_FOUND).replace("{player}", args[1]));
+            OfflinePlayer offlinePlayer = Bukkit.getServer().getOfflinePlayer(args[1]);
+
+            ignoreManager.removeIgnore((Player) sender, offlinePlayer.getName(), offlinePlayer.getUniqueId().toString());
             return;
+
         }
 
-        ignoreManager.addIgnore((Player) sender, target);
+        ignoreManager.removeIgnore((Player) sender, target.getName(), target.getUniqueId().toString());
     }
 
 

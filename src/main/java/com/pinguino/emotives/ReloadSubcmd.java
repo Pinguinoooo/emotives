@@ -21,7 +21,6 @@ public class ReloadSubcmd extends Subcommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
-
             Main.getInstance().reloadPlugin();
             MessageUtil.send(sender, "&a[EMOTIVES] Plugin has been reloaded");
     }

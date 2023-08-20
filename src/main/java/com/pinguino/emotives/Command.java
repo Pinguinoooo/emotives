@@ -31,7 +31,7 @@ public abstract class Command implements CommandExecutor, TabCompleter {
             commandSender.sendMessage("This command can only be used by players.");
             return false;
         } else if (permission != null && !commandSender.hasPermission(permission)) {
-            commandSender.sendMessage(LangManager.getMsg(LanguageMessage.NO_PERMISSION).replace("{permission}", permission));
+            Main.getInstance().sendNoPermsMessage(commandSender, permission);
             return false;
         }
 

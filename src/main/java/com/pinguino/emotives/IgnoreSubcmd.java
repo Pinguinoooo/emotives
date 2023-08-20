@@ -29,6 +29,11 @@ public class IgnoreSubcmd extends Subcommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        if (args.length < 2) {
+            MessageUtil.send(sender, "&cUsage: /emotives ignore <player/all/everyone>");
+            return;
+        }
+
         if (args[1].equalsIgnoreCase("all") || args[1].equalsIgnoreCase("everyone")) {
             ignoreManager.ignoreAll((Player) sender);
             return;
@@ -37,7 +42,8 @@ public class IgnoreSubcmd extends Subcommand {
         Player target = Bukkit.getPlayerExact(args[1]);
 
         if (target == null) {
-            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.PLAYER_NOT_FOUND).replace("{player}", args[1]));
+            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.PLAYER_NOT_FOUND,
+                    "Player {player} not found").replace("{player}", args[1]));
             return;
         }
 

@@ -26,13 +26,13 @@ public class EmotesListSubcmd extends Subcommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
 
-            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.HELP_HEADER));
+            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.HELP_HEADER, "&e&lEmotives Help"));
             for (Emote emote : Main.getInstance().getEmotes()) {
                 String permission = emote.getPermission();
                 if (sender.hasPermission(permission) && !emote.isDisabled())
-                  MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.EMOTE_MESSAGE)
+                  MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.EMOTE_MESSAGE, "&e/emotives {emote} &7- {description}")
                           .replace("{emote}", emote.getName())
-                          .replace("{permission}", permission));
+                          .replace("{description}", emote.getDescription()));
             }
     }
 

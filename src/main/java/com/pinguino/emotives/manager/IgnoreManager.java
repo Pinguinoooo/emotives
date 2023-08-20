@@ -2,13 +2,15 @@ package com.pinguino.emotives.manager;
 
 import com.pinguino.emotives.Main;
 import com.pinguino.emotives.utils.MessageUtil;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class IgnoreManager {
 
@@ -41,26 +43,31 @@ public class IgnoreManager {
 
             ignoreList.set(player.getUniqueId() + ".players", list);
 
+            MessageUtil.send(player, LangManager.getMsg(LanguageMessage.IGNORED, "You are now ignoring emotes from {player}").replace("{player}", target.getName()));
+
             try {
                 ignoreList.save(file);
             } catch (Exception e) {
                 System.out.println("Could not save ignoreList.yml");
             }
         } else {
-            MessageUtil.send(player, LangManager.getMsg(LanguageMessage.ALREADY_IGNORING).replace("{player}", target.getName()));
+            MessageUtil.send(player, LangManager.getMsg(LanguageMessage.ALREADY_IGNORING, "You are already ignoring {player}").replace("{player}", target.getName()));
         }
     }
 
-    public void removeIgnore(Player player, Player target) {
+    public void removeIgnore(Player player, String targetName, String targetUUID) {
 
         List <String> list = ignoreList.getConfigurationSection(player.getUniqueId().toString()) != null
                 ? ignoreList.getStringList(player.getUniqueId() + ".players")
                 : new ArrayList<>();
 
-        if (!list.contains(target.getUniqueId().toString())) {
-            list.remove(target.getUniqueId().toString());
+        if (list.contains(targetUUID)) {
+            list.remove(targetUUID);
 
             ignoreList.set(player.getUniqueId() + ".players", list);
+
+            MessageUtil.send(player, LangManager.getMsg(LanguageMessage.UNIGNORED, "You are no longer ignoring {player}")
+                    .replace("{player}", targetName));
 
             try {
                 ignoreList.save(file);
@@ -68,12 +75,14 @@ public class IgnoreManager {
                 System.out.println("Could not save ignoreList.yml");
             }
         } else {
-            MessageUtil.send(player, LangManager.getMsg(LanguageMessage.NOT_IGNORING).replace("{player}", target.getName()));
+            MessageUtil.send(player, LangManager.getMsg(LanguageMessage.NOT_IGNORING, "You are not ignoring {player}")
+                    .replace("{player}", targetName));
         }
     }
 
     public void ignoreAll(Player player) {
         ignoreList.set(player.getUniqueId() + ".hasIgnoredAll", true);
+        MessageUtil.send(player, LangManager.getMsg(LanguageMessage.IGNORED_ALL, "You are now ignoring all emotes from everyone"));
 
         try {
             ignoreList.save(file);
@@ -84,6 +93,7 @@ public class IgnoreManager {
     
     public void unignoreAll(Player player) {
         ignoreList.set(player.getUniqueId() + ".hasIgnoredAll", false);
+        MessageUtil.send(player, LangManager.getMsg(LanguageMessage.UNIGNORED_ALL, "You are now accepting emotes again"));
 
         try {
             ignoreList.save(file);
@@ -92,10 +102,8 @@ public class IgnoreManager {
         }
     }
 
-    public void getIgnoreList(String uuid) {
-         List<String> list = ignoreList.getStringList(uuid) != null ? ignoreList.getStringList(uuid + ".players") : new ArrayList<>();
-
-         return;
+    public ConfigurationSection getIgnoreList(String uuid) {
+          return ignoreList.getConfigurationSection(uuid);
     }
 
     public boolean hasEveryoneIgnored(String uuid) {

@@ -19,6 +19,10 @@ public abstract class Subcommand implements TabCompleter {
     public abstract void execute(CommandSender sender, String[] args);
 
     public void execute(CommandSender commandSender, String s, String[] strings) {
+        if (hasPermission && !commandSender.hasPermission("emotives." + getName())) {
+            Main.getInstance().sendNoPermsMessage(commandSender, "emotives." + getName());
+            return;
+        }
         execute(commandSender, strings);
     }
 
