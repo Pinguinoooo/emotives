@@ -73,6 +73,11 @@ public class Emote extends EmoteCommand {
             return;
         }
 
+        if (disabled) {
+            MessageUtil.send(sender, Bukkit.spigot().getConfig().getString("messages.unknown-command"));
+            return;
+        }
+
         Player player = (Player) sender;
 
         if (args.length < 1) {
@@ -167,6 +172,10 @@ public class Emote extends EmoteCommand {
 
         }
         return StringUtil.copyPartialMatches(args[0], results, new ArrayList<>());
+    }
+
+    public boolean isDisabled() {
+        return disabled;
     }
 
 }
