@@ -120,9 +120,10 @@ public final class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        // Unregister your plugin properly
-        PluginManager pluginManager = getServer().getPluginManager();
-        pluginManager.disablePlugin(this);
+          // Plugin shutdown logic
+        for (Emote emote : emotes) {
+            emote.setDisabled(true);
+        }
     }
 
     // reload

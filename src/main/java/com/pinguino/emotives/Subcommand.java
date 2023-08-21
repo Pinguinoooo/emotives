@@ -2,8 +2,7 @@ package com.pinguino.emotives;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-
-import java.util.ArrayList;
+import org.bukkit.entity.Player;
 
 public abstract class Subcommand implements TabCompleter {
     public boolean hasPermission;
@@ -18,12 +17,23 @@ public abstract class Subcommand implements TabCompleter {
 
     public abstract void execute(CommandSender sender, String[] args);
 
-    public void execute(CommandSender commandSender, String s, String[] strings) {
+    public void onCommand(CommandSender commandSender, String[] args) {
         if (hasPermission && !commandSender.hasPermission("emotives." + getName())) {
             Main.getInstance().sendNoPermsMessage(commandSender, "emotives." + getName());
             return;
         }
-        execute(commandSender, strings);
+
+        if (!canConsoleUse() && !(commandSender instanceof Player)) {
+            commandSender.sendMessage("This command can only be used by players.");
+            return;
+        }
+
+        if (hasPermission && !commandSender.hasPermission("emotives." + this.getName())) {
+            Main.getInstance().sendNoPermsMessage(commandSender, "emotives." + this.getName());
+            return;
+        }
+
+        execute(commandSender, args);
     }
 
     public boolean canConsoleUse() {

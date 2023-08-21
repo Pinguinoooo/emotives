@@ -1,5 +1,7 @@
 package com.pinguino.emotives;
 
+import com.pinguino.emotives.manager.LangManager;
+import com.pinguino.emotives.manager.LanguageMessage;
 import com.pinguino.emotives.utils.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -61,46 +63,54 @@ public class Emote extends EmoteCommand {
 
     @Override
     public void execute(CommandSender sender, String[] args) {
+        // check if emote is disabled cuz of plugin disable or config
         if (disabled) {
-            sender.sendMessage(ChatColor.RED + "This emote is disabled");
+            MessageUtil.send(sender, Bukkit.spigot().getConfig().getString("messages.unknown-command"));
             return;
         }
 
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        Player player = (Player) sender;
 
-            if (args.length < 1) {
-                player.sendMessage(ChatColor.RED + "Usage: " + this.getName() + " <player>");
-                return;
-            }
-
-            Player target = Bukkit.getPlayerExact(args[0]);
-
-            if (target == null) {
-                player.sendMessage(ChatColor.RED + "Player not found");
-                return;
-            }
-
-            if (main.getIgnoreManager().hasEveryoneIgnored(target.getUniqueId().toString()) || main.getIgnoreManager().isIgnoring(target.getUniqueId().toString(), player.getUniqueId().toString())) {
-                player.sendMessage(ChatColor.RED + target.getName() + " is not accepting emotes!");
-                return;
-            }
-
-            if (!player.hasPermission("emotives.cooldowns.bypass")) {
-                // Check if the player has a cooldown
-                if (main.getCooldowns().asMap().containsKey(player.getUniqueId())) {
-                    long secondsLeft = main.getCooldowns().getIfPresent(player.getUniqueId()) - System.currentTimeMillis();
-                    player.sendMessage(ChatColor.RED + "You have to wait " + secondsLeft / 1000 + " seconds before you can use this command again.");
-                    return;
-                    // otherwise set the cooldown
-                } else {
-                    long configCooldown = main.getCooldown();
-                    main.getCooldowns().put(player.getUniqueId(), System.currentTimeMillis() + (configCooldown * 1000));
-                }
-            }
-
-            executeEmote(player, target);
+        if (args.length < 1) {
+            player.sendMessage(ChatColor.RED + "Usage: " + this.getName() + " <player>");
+            return;
         }
+
+        Player target = Bukkit.getPlayerExact(args[0]);
+
+        // check if the target is the sender
+        if (target == sender) {
+            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.CANNOT_EMOTE_YOURSELF, "&cYou cannot execute emotes on yourself!"));
+            return;
+        }
+
+        // check if the target is null
+        if (target == null) {
+            player.sendMessage(ChatColor.RED + "Player not found");
+            return;
+        }
+
+        // check if target has sender / everyone ignored
+        if (main.getIgnoreManager().hasEveryoneIgnored(target.getUniqueId().toString()) || main.getIgnoreManager().isIgnoring(target.getUniqueId().toString(), player.getUniqueId().toString())) {
+            player.sendMessage(ChatColor.RED + target.getName() + " is not accepting emotes!");
+            return;
+        }
+
+        if (!player.hasPermission("emotives.cooldowns.bypass")) {
+            // Check if the player has a cooldown
+            if (main.getCooldowns().asMap().containsKey(player.getUniqueId())) {
+                long secondsLeft = main.getCooldowns().getIfPresent(player.getUniqueId()) - System.currentTimeMillis();
+                player.sendMessage(ChatColor.RED + "You have to wait " + secondsLeft / 1000 + " seconds before you can use this command again.");
+                return;
+                // otherwise set the cooldown
+            } else {
+                long configCooldown = main.getCooldown();
+                main.getCooldowns().put(player.getUniqueId(), System.currentTimeMillis() + (configCooldown * 1000));
+            }
+        }
+
+        executeEmote(player, target);
+
     }
 
     public void reloadEmote() {
@@ -130,6 +140,7 @@ public class Emote extends EmoteCommand {
             playerWorld.spawnParticle(particle, player.getLocation().add(0, 0.5, 0.5), 3, 0.5, 0.5, 0.5);
             targetWorld.spawnParticle(particle, target.getLocation().add(0, 0.5, 0.5), 3, 0.5, 0.5, 0.5);
         } catch (IllegalArgumentException e) {
+            if (particleString.equals("NONE") || particleString.equals("NULL")) return;
             main.debug("Invalid particle name: " + particleString + ". Particle will not be ran", Level.SEVERE);
         }
 
@@ -157,4 +168,9 @@ public class Emote extends EmoteCommand {
     public boolean isDisabled() {
         return disabled;
     }
+
+    public void setDisabled(boolean b) {
+        this.disabled = b;
+    }
 }
+

@@ -41,6 +41,11 @@ public class IgnoreSubcmd extends Subcommand {
 
         Player target = Bukkit.getPlayerExact(args[1]);
 
+        if (target == sender) {
+            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.CANNOT_IGNORE_YOURSELF, "&cYou cannot ignore yourself"));
+            return;
+        }
+
         if (target == null) {
             MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.PLAYER_NOT_FOUND,
                     "Player {player} not found").replace("{player}", args[1]));

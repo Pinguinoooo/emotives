@@ -41,6 +41,11 @@ public class UnignoreSubcmd extends Subcommand {
 
         Player target = Bukkit.getPlayerExact(args[1]);
 
+        if (target == sender) {
+            MessageUtil.send(sender, LangManager.getMsg(LanguageMessage.CANNOT_IGNORE_YOURSELF, "&cYou cannot ignore yourself"));
+            return;
+        }
+
         if (target == null) {
             OfflinePlayer offlinePlayer = Bukkit.getServer().getOfflinePlayer(args[1]);
 

@@ -1,8 +1,5 @@
 package com.pinguino.emotives;
 
-import com.pinguino.emotives.manager.LangManager;
-import com.pinguino.emotives.manager.LanguageMessage;
-import com.pinguino.emotives.utils.MessageUtil;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
@@ -29,8 +26,8 @@ public class EmotivesCommand extends Command {
         subCommands.put(subCommand.getName(), subCommand);
     }
 
-    protected ArrayList<String> getSubCommandNames() {
-        return new ArrayList<>(subCommands.keySet());
+    protected ArrayList<Subcommand> getSubcommands() {
+        return  new ArrayList<>(subCommands.values());
     }
 
     @Override
@@ -45,22 +42,11 @@ public class EmotivesCommand extends Command {
 
             Subcommand subCommand = subCommands.get(args[0].toLowerCase());
 
-            if (!subCommand.canConsoleUse() && !(sender instanceof Player)) {
-                System.out.println("This command can only be used by players");
-                return;
-            }
-
-            if (subCommand.hasPermission && !sender.hasPermission("emotives." + subCommand.getName())) {
-                Main.getInstance().sendNoPermsMessage(sender, "emotives." + subCommand.getName());
-                return;
-            }
-
-            subCommand.execute(sender, args);
+            subCommand.onCommand(sender, args);
             return;
         }
 
         Main.getInstance().getHelpMenu(sender);
-
     }
 
     @Override
@@ -74,10 +60,15 @@ public class EmotivesCommand extends Command {
     }
 
     private List<String> getTabOptions(CommandSender sender) {
-        ArrayList<String> list = this.getSubCommandNames();
+        ArrayList<Subcommand> list = this.getSubcommands();
         // filter list based on perms
-        list.removeIf(subcmd -> !sender.hasPermission("emotives." + subcmd));
-        return list;
-    }
+        list.removeIf(subcmd -> subcmd.hasPermission && !sender.hasPermission("emotives." + subcmd.getName()));
 
+        ArrayList<String> options = new ArrayList<>();
+        for (Subcommand subcmd : list) {
+            options.add(subcmd.getName());
+        }
+
+        return options;
+    }
 }
