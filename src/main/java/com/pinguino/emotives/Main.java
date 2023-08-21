@@ -120,10 +120,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-          // Plugin shutdown logic
-        for (Emote emote : emotes) {
-            emote.setDisabled(true);
-        }
+
     }
 
     // reload

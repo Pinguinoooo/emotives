@@ -14,6 +14,7 @@ import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.logging.Level;
 
 public class Emote extends EmoteCommand {
@@ -64,7 +65,10 @@ public class Emote extends EmoteCommand {
     @Override
     public void execute(CommandSender sender, String[] args) {
         // check if emote is disabled cuz of plugin disable or config
-        if (disabled) {
+        try {
+          Bukkit.getPluginManager().getPlugin("Emotives").isEnabled();
+        } catch (NullPointerException e) {
+            // means plugin is disabled
             MessageUtil.send(sender, Bukkit.spigot().getConfig().getString("messages.unknown-command"));
             return;
         }
@@ -165,12 +169,5 @@ public class Emote extends EmoteCommand {
         return StringUtil.copyPartialMatches(args[0], results, new ArrayList<>());
     }
 
-    public boolean isDisabled() {
-        return disabled;
-    }
-
-    public void setDisabled(boolean b) {
-        this.disabled = b;
-    }
 }
 
